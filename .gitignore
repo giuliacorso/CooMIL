@@ -1,0 +1,24 @@
+launch.sh
+# Ignore compiled Python files
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore __pycache__ directories
+__pycache__/
+**/__pycache__/
+
+# Ignore wandb folder
+wandb/
+
+#Ignore checkpoints
+checkpoints/
+
+#Ignore experiments
+#utils/experiments.py
+
+#Ignore results
+results/
+
+#Ignore main
+#utils/main.py
