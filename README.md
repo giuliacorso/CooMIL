@@ -81,4 +81,4 @@ python -u utils/main.py --model conslide --dataset seq-wsi --exp_desc conslide -
 
 ## Acknowledgements
 
-Framework code for Continual Learning was largely adapted via making modifications to [ConSlide]([https://github.com/HKU-MedAI/ConSlide])
+Framework code for Continual Learning was largely adapted via making modifications to [ConSlide](https://github.com/HKU-MedAI/ConSlide)
