@@ -1,37 +1,35 @@
 # CooMIL
 Context-guided Prompt-learning for Continual WSI Classification
 
-## Training Data Preparation
+## Data Preparation
 
-We mainly follow the pipeline of [CLAM](https://github.com/mahmoodlab/CLAM), in particular we use the following code to extract tiles of regions and patches:
+The [CLAM](https://github.com/mahmoodlab/CLAM) pipeline is followed, in particular the following code is used to extract tiles of regions and patches:
 ```
-python create_patches_fp.py --source DATA_DIRECTORY --save_dir RESULTS_DIRECTORY --patch_size 256 --seg --patch --stitch 
+python create_patches_fp.py --source DATA_DIRECTORY --save_dir RESULTS_DIRECTORY --seg --patch --stitch 
 ```
 
 The patch size in the final output is determined by the combination of parameters:  
 - `--patch_size`: defines the size of the extracted patch at the selected resolution level.  
 - `--step_size`: controls the stride between consecutive patches (set equal to `--patch_size` for non-overlapping patches).  
 
-Regions and patches were extracted at the highest available resolution (**segmentation level 0**). Each region corresponds to a **4096 × 4096** area of the WSI (with `--patch_size` and `--step_size` set to 4096), while the extracted patches are resized to a fixed size of **512 × 512** pixels (with `--patch_size` and `--step_size` set to 512).
+Regions and patches are extracted at the highest available resolution (**40x, segmentation level 0**). Each region corresponds to a **4096 × 4096** area of the WSI (with `--patch_size` and `--step_size` set to 4096), while the extracted patches to **512 × 512** pixels (with `--patch_size` and `--step_size` set to 512).
 
 Once the tiles are extracted, the user needs to run the script `preprocessing/feature_extraction.py` to compute the features for both regions and patches.  
 
-Starting from these features, the final preprocessing step is to associate the features of each region with the features of the patches contained within it, preserving their spatial relationships. The result is saved as pickle files, with one file per WSI. To perform this step, the user needs to run `preprocessing/feature_aggregation.py`.
+Starting from these features, the final preprocessing step is to associate the features of each region with the features of the patches contained within it, preserving their spatial relationships. The result are saved as one pickle file for each WSI. To perform this step, the user needs to run the script `preprocessing/feature_aggregation.py`.
 
-In the repository, you can find several CSV files for each tumor, in particular one for each feature extractor tested, named as `tumor10fold_featsextractor.csv`. These files are structured as follows:
+The repository contains one CSV file for each tissue (breast, esophagus, kidney, lung), named as `tissue10fold_conch.csv`, structured as follows:
 ```
 slide,labels,fold
-path_to_feats_conch_slide/TCGA-E2-A1IU-01Z-00-DX1_1.pkl,1,2.0
-
 ```
 Each CSV file is designed to serve as input for the following phase. Make sure to generate these input files so that they include:  
 
-- the path to the pickle file of each WSI  
-- the label of the WSI  
-- the test fold associated with each WSI
+- the path to the pickle file of each WSI, which contains the multi-resolution embeddings extracted with [CONCH](https://github.com/mahmoodlab/CONCH.git)  
+- the label of the WSI, which is a number from 0 to 7
+- the test fold associated with each WSI, which is a number from 0 to 9
 
 Finally, the user needs to customize the `Sequential_Generic_MIL_Dataset` class in  
-`ConSlide_dev/datasets/seq_wsi.py` based on the tumor types and the number of tasks to test.  
+`CooMIL/datasets/seq_wsi.py` based on the tumor types and the number of tasks to test.  
 
 Specifically, the following attributes must be updated:  
 - `self.N_TASKS`: number of tumor types considered  
@@ -39,7 +37,7 @@ Specifically, the following attributes must be updated:
 - `self.class_names`: class labels for all tumor subtypes included  
 - `self.task_names`: names of the tumor-level tasks  
 
-For example, the default implementation is set for the **four tumor types explored in our study**:
+For example, the default implementation is set for the **four tumor types explored in the study**:
 
 ```python
 self.N_TASKS = 4
@@ -60,7 +58,7 @@ If you want to test a different set of tumors, make sure to adapt all the attrib
 
 ## Training Example
 
-The following commands show how to launch the training for each model included in the framework, both for our proposed method and for the competitor baselines.
+The following commands show how to launch the training for each model included in the framework, both for the proposed method and for the competitor baselines.
 
 
 ```
